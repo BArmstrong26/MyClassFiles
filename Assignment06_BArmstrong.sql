@@ -236,7 +236,7 @@ Create View vProductsByCategories
 With SchemaBinding
 AS
 	(Select top(1000000000) CategoryName, ProductName, UnitPrice
-	From dbo.Categories as c Inner Join dbo.Products as p
+	From dbo.vCategories as c Inner Join dbo.vProducts as p
 	On c.CategoryID = p.CategoryID
 	Order By CategoryName, ProductName)
 ;
@@ -251,8 +251,8 @@ Create View vInventoriesByProductsByDates
 with SCHEMABINDING
 AS
 	(select top(100000000) ProductName, InventoryDate, Count
-	from dbo.Products inner join dbo.Inventories
-	  on products.productID = inventories.ProductID
+	from dbo.vProducts as p inner join dbo.vInventories as i
+	  on p.productID = i.ProductID
 	Order by ProductName, InventoryDate, [Count]);
 GO
 
@@ -265,8 +265,8 @@ Create VIEW vInventoriesByEmployeesByDates
 With SCHEMABINDING
 AS
 	(Select top(10000000) InventoryDate, max(EmployeeFirstName + ' ' + EmployeeLastName) as [Employee Name]
-	From dbo.Inventories Inner Join dbo.Employees
-	On Inventories.EmployeeID = Employees.EmployeeID
+	From dbo.vInventories as i Inner Join dbo.vEmployees as e
+	On i.EmployeeID = e.EmployeeID
 	Group By InventoryDate
 	Order By InventoryDate);
 GO
@@ -286,10 +286,10 @@ create VIEW vInventoriesByProductsByCategories
 with SCHEMABINDING
 AS
 	(Select top(10000000) CategoryName, ProductName, InventoryDate, [Count]
-	From dbo.Categories inner join dbo.Products
-	On Categories.CategoryID = Products.CategoryID
-	Inner Join dbo.Inventories
-	On Products.ProductID = Inventories.ProductID
+	From dbo.vCategories as c inner join dbo.vProducts as p
+	On c.CategoryID = p.CategoryID
+	Inner Join dbo.vInventories as i
+	On p.ProductID = i.ProductID
 	Order By CategoryName, ProductName, InventoryDate, Count);
 GO
 
@@ -301,12 +301,12 @@ Create View vInventoriesByProductsByEmployees
 with SCHEMABINDING
 AS
 	(Select top(10000000) CategoryName, ProductName, InventoryDate, [Count], EmployeeFirstName + ' ' + EmployeeLastName as [Employee Name]
-	From dbo.Categories inner join dbo.Products
-	On Categories.CategoryID = Products.CategoryID
-	Inner Join dbo.Inventories
-	On Products.ProductID = Inventories.ProductID
-	Inner Join dbo.Employees
-	On Inventories.EmployeeID = Employees.EmployeeID
+	From dbo.vCategories as c inner join dbo.vProducts as p
+	On c.CategoryID = p.CategoryID
+	Inner Join dbo.vInventories as i
+	On p.ProductID = i.ProductID
+	Inner Join dbo.vEmployees as e
+	On i.EmployeeID = e.EmployeeID
 	Order By InventoryDate, CategoryName, ProductName, [Employee Name]);
 GO
 
@@ -319,12 +319,12 @@ Create View vInventoriesForChaiAndChangByEmployees
 with Schemabinding 
 AS
 	(Select top(10000000) CategoryName, ProductName, InventoryDate, [Count], EmployeeFirstName + ' ' + EmployeeLastName as [Employee Name]
-	From dbo.Categories inner join dbo.Products
-	On Categories.CategoryID = Products.CategoryID
-	Inner Join dbo.Inventories
-	On Products.ProductID = Inventories.ProductID
-	Inner Join dbo.Employees
-	On inventories.EmployeeID = Employees.EmployeeID
+	From dbo.vCategories as c inner join dbo.vProducts as p
+	On c.CategoryID = p.CategoryID
+	Inner Join dbo.vInventories as i
+	On p.ProductID = i.ProductID
+	Inner Join dbo.vEmployees as e
+	On i.EmployeeID = e.EmployeeID
 	Where ProductName IN ('Chai', 'Chang')
 	Order By InventoryDate, CategoryName, ProductName, [Employee Name]);
 GO
@@ -339,7 +339,7 @@ AS
 	(Select top (100000000)
  		[Employee] = (Emp.EmployeeFirstName + ' ' + Emp.EmployeeLastName),
 		[Manager] = (Mgr.EmployeeFirstName + ' ' + Mgr.EmployeeLastName)
-	From dbo.Employees as Emp Inner Join dbo.Employees as Mgr
+	From dbo.vEmployees as Emp Inner Join dbo.vEmployees as Mgr
 	On 	Emp.ManagerID = Mgr.EmployeeID 
 	Order By 1); 
 Go
@@ -357,13 +357,13 @@ AS
 		i.InventoryID, i.InventoryDate, i.Count, 
 		e.EmployeeID, [Employee] = (e.EmployeeFirstName + ' ' + e.EmployeeLastName),
 		[Manager] = (m.EmployeeFirstName + ' ' + m.EmployeeLastName)
-	From dbo.Categories as c inner join dbo.Products as p
+	From dbo.vCategories as c inner join dbo.vProducts as p
 	On c.CategoryID = p.CategoryID
-	Inner Join dbo.Inventories as i
+	Inner Join dbo.vInventories as i
 	On p.ProductID = i.ProductID
-	Inner Join dbo.Employees as e
+	Inner Join dbo.vEmployees as e
 	On i.EmployeeID = e.EmployeeID
-	Inner Join dbo.Employees as m 
+	Inner Join dbo.vEmployees as m 
 	On 	e.ManagerID = m.EmployeeID 
 	Order By CategoryName, ProductName, InventoryID);
 GO
